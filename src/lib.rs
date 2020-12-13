@@ -3,8 +3,15 @@
 extern crate rusoto_core;
 
 use rusoto_core::Region;
-use rusoto_kms::{KeyListEntry, Kms, KmsClient, ListKeysRequest, ListKeysResponse};
+use rusoto_kms::{
+    DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest,
+    ListKeysResponse,
+};
 use tokio::runtime::Runtime;
+
+fn get_client() -> KmsClient {
+    KmsClient::new(Region::UsEast1)
+}
 
 /// Gets the list of all Customer Master Keys (CMKs) in current AWS account (defaults to us-east-1).
 pub fn list_keys() -> Vec<String> {
@@ -13,15 +20,31 @@ pub fn list_keys() -> Vec<String> {
         .block_on(get_keys(get_client()))
 }
 
+pub fn describe_key(key_id: &str) -> String {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(get_key(get_client(), key_id))
+}
+
+async fn get_key(client: KmsClient, key_id: &str) -> String {
+    let request = DescribeKeyRequest {
+        grant_tokens: None,
+        key_id: key_id.to_string(),
+    };
+
+    let result = client.describe_key(request).await;
+
+    match result {
+        Ok(response) => parse_key_metadata(response.key_metadata.unwrap_or_default()),
+        Err(value) => value.to_string(),
+    }
+}
+
 async fn get_keys(client: KmsClient) -> Vec<String> {
     let request = ListKeysRequest::default();
 
     let response: ListKeysResponse = client.list_keys(request).await.unwrap();
     parse_key_list_entries(response.keys.unwrap_or_default())
-}
-
-fn get_client() -> KmsClient {
-    KmsClient::new(Region::UsEast1)
 }
 
 fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Vec<String> {
@@ -34,6 +57,18 @@ fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Vec<String> {
     }
 
     keys_str
+}
+
+fn parse_key_metadata(metatdata: KeyMetadata) -> String {
+    let mut key_str = String::new();
+    key_str.push_str(&metatdata.key_id);
+    key_str.push('|');
+    key_str.push_str(&metatdata.arn.unwrap_or_default());
+    key_str.push('|');
+    key_str.push_str(&metatdata.description.unwrap_or_default());
+    key_str.push('|');
+    key_str.push_str(&metatdata.enabled.unwrap_or_default().to_string());
+    key_str
 }
 
 #[cfg(test)]
