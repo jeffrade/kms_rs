@@ -4,10 +4,7 @@
 extern crate rusoto_core;
 
 use rusoto_core::Region;
-use rusoto_kms::{
-    DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest,
-    ListKeysResponse,
-};
+use rusoto_kms::{DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::value::Value;
@@ -61,8 +58,12 @@ async fn get_key(client: KmsClient, key_id: &str) -> Value {
 async fn get_keys(client: KmsClient) -> Value {
     let request = ListKeysRequest::default();
 
-    let response: ListKeysResponse = client.list_keys(request).await.unwrap();
-    parse_key_list_entries(response.keys.unwrap_or_default())
+    let result = client.list_keys(request).await;
+
+    match result {
+        Ok(response) => parse_key_list_entries(response.keys.unwrap_or_default()),
+        Err(value) => json!(value.to_string()),
+    }
 }
 
 fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Value {
