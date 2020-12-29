@@ -1,4 +1,4 @@
-//! A crate for using AWS KMS
+//! A crate (still under construction) for interacting with AWS KMS. Uses [rusoto](https://github.com/rusoto/rusoto) and [tokio](https://github.com/tokio-rs/tokio).
 #![allow(non_snake_case)]
 
 extern crate rusoto_core;
@@ -39,18 +39,21 @@ pub fn list_keys() -> Value {
         .block_on(get_keys(get_client()))
 }
 
+/// Provides detailed information about a customer master key (CMK). 
 pub fn describe_key(key_id: &str) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(get_key(get_client(), key_id))
 }
 
+/// Creates a unique customer managed customer master key (CMK) in your AWS account and Region.
 pub fn create_key() -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(create_key_and_parse(get_client()))
 }
 
+/// Schedules the deletion of a customer master key (CMK). You may provide a waiting period, specified in days, before deletion occurs.
 pub fn schedule_key_deletion(key_id: String, pending_window_in_days: i64) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
@@ -61,18 +64,21 @@ pub fn schedule_key_deletion(key_id: String, pending_window_in_days: i64) -> Val
         ))
 }
 
+/// Cancels the deletion of a customer master key (CMK). When this operation succeeds, the key state of the CMK is Disabled.
 pub fn cancel_key_deletion(key_id: String) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(cancel_key_deletion_and_parse(get_client(), key_id))
 }
 
+/// Sets the key state to disabled of a customer master key (CMK) to enabled.
 pub fn disable_key(key_id: &str) -> Option<Value> {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(disable_key_and_respond(get_client(), key_id))
 }
 
+/// Sets the key state to enabled of a customer master key (CMK) to enabled.
 pub fn enable_key(key_id: &str) -> Option<Value> {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
