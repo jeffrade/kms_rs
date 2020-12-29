@@ -39,7 +39,7 @@ pub fn list_keys() -> Value {
         .block_on(get_keys(get_client()))
 }
 
-/// Provides detailed information about a customer master key (CMK). 
+/// Provides detailed information about a customer master key (CMK).
 pub fn describe_key(key_id: &str) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
