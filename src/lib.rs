@@ -5,8 +5,9 @@ extern crate rusoto_core;
 
 use rusoto_core::Region;
 use rusoto_kms::{
-    CreateKeyRequest, DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
-    ListKeysRequest, ScheduleKeyDeletionRequest, ScheduleKeyDeletionResponse,
+    CreateKeyRequest, DescribeKeyRequest, DisableKeyRequest, EnableKeyRequest, KeyListEntry,
+    KeyMetadata, Kms, KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
+    ScheduleKeyDeletionResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -58,6 +59,18 @@ pub fn schedule_key_deletion(key_id: String, pending_window_in_days: i64) -> Val
             key_id,
             pending_window_in_days,
         ))
+}
+
+pub fn disable_key(key_id: &str) -> Option<Value> {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(disable_key_and_respond(get_client(), key_id))
+}
+
+pub fn enable_key(key_id: &str) -> Option<Value> {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(enable_key_and_respond(get_client(), key_id))
 }
 
 async fn get_key(client: KmsClient, key_id: &str) -> Value {
@@ -113,6 +126,30 @@ async fn schedule_key_deletion_and_parse(
     match result {
         Ok(response) => parse_schedule_deletion_response(response),
         Err(value) => json!(value.to_string()),
+    }
+}
+
+async fn enable_key_and_respond(client: KmsClient, key_id: &str) -> Option<Value> {
+    let request = EnableKeyRequest {
+        key_id: key_id.to_string(),
+    };
+    let result = client.enable_key(request).await;
+
+    match result {
+        Ok(()) => None, // AWS gives an empty response
+        Err(value) => Some(json!(value.to_string())),
+    }
+}
+
+async fn disable_key_and_respond(client: KmsClient, key_id: &str) -> Option<Value> {
+    let request = DisableKeyRequest {
+        key_id: key_id.to_string(),
+    };
+    let result = client.disable_key(request).await;
+
+    match result {
+        Ok(()) => None, // AWS gives an empty response
+        Err(value) => Some(json!(value.to_string())),
     }
 }
 

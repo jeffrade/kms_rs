@@ -26,6 +26,16 @@ fn main() {
                 .arg_from_usage("--key-id=[KEYID] 'key-id to delete'")
                 .arg_from_usage("--pending-window-in-days=[WINDOW_DAYS] 'between 7 and 30 inclusive (defaults to 30)'")
         )
+        .subcommand(
+            clap::SubCommand::with_name("enable-key")
+                .about("Sets the key state to enabled of a customer master key (CMK) to enabled.")
+                .arg_from_usage("--key-id=[KEYID] 'key-id to enable'")
+        )
+        .subcommand(
+            clap::SubCommand::with_name("disable-key")
+                .about("Sets the key state to disabled of a customer master key (CMK) to enabled.")
+                .arg_from_usage("--key-id=[KEYID] 'key-id to disable'")
+        )
         .get_matches();
 
     if matches.subcommand_matches("list-keys").is_some() {
@@ -34,8 +44,8 @@ fn main() {
     } else if let Some(matches) = matches.subcommand_matches("describe-key") {
         if matches.is_present("key-id") {
             let key_id: &str = matches.value_of("key-id").unwrap();
-            let key: serde_json::value::Value = kms_rs::describe_key(key_id);
-            println!("{}", key.to_string());
+            let resp: serde_json::value::Value = kms_rs::describe_key(key_id);
+            println!("{}", resp.to_string());
         } else {
             println!("You must provide the key-id arg!");
         }
@@ -62,6 +72,26 @@ fn main() {
                 let resp: serde_json::value::Value =
                     kms_rs::schedule_key_deletion(key_id, 30 as i64);
                 println!("{}", resp.to_string())
+            }
+        } else {
+            println!("You must provide the key-id arg!");
+        }
+    } else if let Some(matches) = matches.subcommand_matches("enable-key") {
+        if matches.is_present("key-id") {
+            let key_id: &str = matches.value_of("key-id").unwrap();
+            match kms_rs::enable_key(key_id) {
+                Some(resp) => println!("{}", resp.to_string()),
+                None => (),
+            }
+        } else {
+            println!("You must provide the key-id arg!");
+        }
+    } else if let Some(matches) = matches.subcommand_matches("disable-key") {
+        if matches.is_present("key-id") {
+            let key_id: &str = matches.value_of("key-id").unwrap();
+            match kms_rs::disable_key(key_id) {
+                Some(resp) => println!("{}", resp.to_string()),
+                None => (),
             }
         } else {
             println!("You must provide the key-id arg!");

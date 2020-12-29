@@ -20,6 +20,8 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Describe a single key](https://docs.aws.amazon.com/cli/latest/reference/kms/describe-key.html) given a key-id
  - [Create a key](https://docs.aws.amazon.com/cli/latest/reference/kms/create-key.html) (symmetric only)
  - [Delete a key](https://docs.aws.amazon.com/cli/latest/reference/kms/schedule-key-deletion.html)
+ - [Enable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/enable-key.html) given a key-id
+ - [Disable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/disable-key.html) given a key-id
 
 #### Excluded in AWS Free Tier:
  - GenerateDataKeyPair
