@@ -15,6 +15,10 @@ fn main() {
                 .about("Provides detailed information about a customer master key (CMK).")
                 .arg_from_usage("--key-id=[KEYID] 'metadata for a given key-id'")
         )
+        .subcommand(
+            clap::SubCommand::with_name("create-key")
+                .about("Creates a unique customer managed customer master key (CMK) in your AWS account and Region.")
+        )
         .get_matches();
 
     if matches.subcommand_matches("list-keys").is_some() {
@@ -28,6 +32,9 @@ fn main() {
         } else {
             println!("You must provide the key-id arg!");
         }
+    } else if matches.subcommand_matches("create-key").is_some() {
+        let resp: serde_json::value::Value = kms_rs::create_key();
+        println!("{}", resp.to_string());
     } else {
         println!("You must pass a valid command!");
     }

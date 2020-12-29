@@ -4,7 +4,10 @@
 extern crate rusoto_core;
 
 use rusoto_core::Region;
-use rusoto_kms::{DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest};
+use rusoto_kms::{
+    CreateKeyRequest, DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
+    ListKeysRequest,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::value::Value;
@@ -41,6 +44,12 @@ pub fn describe_key(key_id: &str) -> Value {
         .block_on(get_key(get_client(), key_id))
 }
 
+pub fn create_key() -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(create_key_and_parse(get_client()))
+}
+
 async fn get_key(client: KmsClient, key_id: &str) -> Value {
     let request = DescribeKeyRequest {
         grant_tokens: None,
@@ -62,6 +71,19 @@ async fn get_keys(client: KmsClient) -> Value {
 
     match result {
         Ok(response) => parse_key_list_entries(response.keys.unwrap_or_default()),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+async fn create_key_and_parse(client: KmsClient) -> Value {
+    let mut request = CreateKeyRequest::default();
+    request.key_usage = Some("ENCRYPT_DECRYPT".to_string()); // default
+    request.customer_master_key_spec = Some("SYMMETRIC_DEFAULT".to_string()); // default
+
+    let result = client.create_key(request).await;
+
+    match result {
+        Ok(response) => parse_key_metadata(response.key_metadata.unwrap_or_default()),
         Err(value) => json!(value.to_string()),
     }
 }
