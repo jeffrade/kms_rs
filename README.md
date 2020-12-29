@@ -24,7 +24,9 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Enable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/enable-key.html) given a key-id
  - [Disable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/disable-key.html) given a key-id
 
-#### Excluded in AWS Free Tier:
+A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). Feel free to open an issue to request a command(s) or PR to add them.
+
+#### Note that the following are excludeded from AWS Free Tier:
  - GenerateDataKeyPair
  - GenerateDataKeyPairWithoutPlaintext
  - Sign
@@ -33,11 +35,12 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - Decrypt
  - GetPublicKey that reference asymmetric CMKs
 
-A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). One goal of this crate is to provide you some functionality natively to keep high-volume usage costs down. See the latest costs [here](https://aws.amazon.com/kms/pricing/).
+Because of this, one goal of this crate is to provide you some functionality natively to keep high-volume usage costs down. See the latest costs [here](https://aws.amazon.com/kms/pricing/).
 
 ### Future Goals
 
 #### Integration with AWS CloudHSM
+ - Add native commands that aren't covered under AWS Free Tier
  - CloudHSM details [here](https://aws.amazon.com/cloudhsm/)
  - Pricing calculation [here](https://aws.amazon.com/cloudhsm/pricing/)
 
