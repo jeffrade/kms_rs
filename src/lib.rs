@@ -126,4 +126,39 @@ mod tests {
         });
         assert_eq!(actual_output, expected_output);
     }
+
+    #[test]
+    fn test_parse_key_metadata() {
+        let mock_key_metadata: KeyMetadata = KeyMetadata {
+            arn: Some("arn:aws:kms:us-east-1:123456789:key/abcd-4321-wxyz".to_string()),
+            aws_account_id: Some("1234567899".to_string()),
+            creation_date: Some(1234567.89),
+            custom_key_store_id: Some("".to_string()),
+            cloud_hsm_cluster_id: Some("".to_string()),
+            customer_master_key_spec: Some("SYMMETRIC_DEFAULT".to_string()),
+            deletion_date: Some(1234567.89),
+            description: Some(
+                "Default master key that protects my EBS volumes when no other key is defined"
+                    .to_string(),
+            ),
+            enabled: Some(true),
+            encryption_algorithms: Some(vec!["SYMMETRIC_DEFAULT".to_string()]),
+            expiration_model: Some("".to_string()),
+            key_id: "abcd-4321-wxyz".to_string(),
+            key_manager: Some("".to_string()),
+            key_state: Some("Enabled".to_string()),
+            key_usage: Some("ENCRYPT_DECRYPT".to_string()),
+            origin: Some("AWS_KMS".to_string()),
+            signing_algorithms: None,
+            valid_to: Some(12345678.90),
+        };
+        let actual_output = parse_key_metadata(mock_key_metadata);
+        let expected_output = json!({
+            "KeyId": "abcd-4321-wxyz",
+            "Arn": "arn:aws:kms:us-east-1:123456789:key/abcd-4321-wxyz",
+            "Description": "Default master key that protects my EBS volumes when no other key is defined",
+            "Enabled": true
+        });
+        assert_eq!(actual_output, expected_output);
+    }
 }
