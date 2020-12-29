@@ -8,7 +8,7 @@ _Disclaimer: This project has not been audited and not yet recommended for produ
 
 Uses [rusoto](https://github.com/rusoto/rusoto).
 
-See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.rs) for usage.
+See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.rs) for usage (uses [clap](https://github.com/clap-rs/clap)).
 
 #### Prerequisites
  - An AWS account (sign up [here](https://portal.aws.amazon.com/billing/signup))
