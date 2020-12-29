@@ -6,7 +6,7 @@ extern crate rusoto_core;
 use rusoto_core::Region;
 use rusoto_kms::{
     CreateKeyRequest, DescribeKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
-    ListKeysRequest,
+    ListKeysRequest, ScheduleKeyDeletionRequest, ScheduleKeyDeletionResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -50,6 +50,16 @@ pub fn create_key() -> Value {
         .block_on(create_key_and_parse(get_client()))
 }
 
+pub fn schedule_key_deletion(key_id: String, pending_window_in_days: i64) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(schedule_key_deletion_and_parse(
+            get_client(),
+            key_id,
+            pending_window_in_days,
+        ))
+}
+
 async fn get_key(client: KmsClient, key_id: &str) -> Value {
     let request = DescribeKeyRequest {
         grant_tokens: None,
@@ -88,6 +98,24 @@ async fn create_key_and_parse(client: KmsClient) -> Value {
     }
 }
 
+async fn schedule_key_deletion_and_parse(
+    client: KmsClient,
+    key_id: String,
+    pending_window_in_days: i64,
+) -> Value {
+    let request = ScheduleKeyDeletionRequest {
+        key_id: key_id.to_string(),
+        pending_window_in_days: Some(pending_window_in_days),
+    };
+
+    let result = client.schedule_key_deletion(request).await;
+
+    match result {
+        Ok(response) => parse_schedule_deletion_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
 fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Value {
     let mut keys_json: Vec<KmsRsKey> = Vec::new();
 
@@ -109,6 +137,15 @@ fn parse_key_metadata(metatdata: KeyMetadata) -> Value {
         Enabled: metatdata.enabled.unwrap_or_default(),
     };
     json!(&key_metadata)
+}
+
+fn parse_schedule_deletion_response(
+    schedule_key_deletion_response: ScheduleKeyDeletionResponse,
+) -> Value {
+    json!({
+        "KeyId": schedule_key_deletion_response.key_id.unwrap_or_default(),
+        "DeletionDate": schedule_key_deletion_response.deletion_date.unwrap_or_default(),
+    })
 }
 
 #[cfg(test)]
@@ -180,6 +217,20 @@ mod tests {
             "Arn": "arn:aws:kms:us-east-1:123456789:key/abcd-4321-wxyz",
             "Description": "Default master key that protects my EBS volumes when no other key is defined",
             "Enabled": true
+        });
+        assert_eq!(actual_output, expected_output);
+    }
+
+    #[test]
+    fn test_parse_schedule_deletion_response() {
+        let mock_key_deletion_response = ScheduleKeyDeletionResponse {
+            key_id: Some("abcd-4321-wxyz".to_string()),
+            deletion_date: Some(12345678.90),
+        };
+        let actual_output = parse_schedule_deletion_response(mock_key_deletion_response);
+        let expected_output = json!({
+            "KeyId": "abcd-4321-wxyz",
+            "DeletionDate": 12345678.90
         });
         assert_eq!(actual_output, expected_output);
     }

@@ -19,6 +19,7 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Retrieve a list](https://docs.aws.amazon.com/cli/latest/reference/kms/list-keys.html) of all CMK's (Customer Master Keys) in region us-east-1
  - [Describe a single key](https://docs.aws.amazon.com/cli/latest/reference/kms/describe-key.html) given a key-id
  - [Create a key](https://docs.aws.amazon.com/cli/latest/reference/kms/create-key.html) (symmetric only)
+ - [Delete a key](https://docs.aws.amazon.com/cli/latest/reference/kms/schedule-key-deletion.html)
 
 #### Excluded in AWS Free Tier:
  - GenerateDataKeyPair
