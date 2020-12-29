@@ -27,6 +27,11 @@ fn main() {
                 .arg_from_usage("--pending-window-in-days=[WINDOW_DAYS] 'between 7 and 30 inclusive (defaults to 30)'")
         )
         .subcommand(
+            clap::SubCommand::with_name("cancel-key-deletion")
+            .about("Cancels the deletion of a customer master key (CMK). When this operation succeeds, the key state of the CMK is Disabled.")
+            .arg_from_usage("--key-id=[KEYID] 'key-id to cancel deletion'")
+        )
+        .subcommand(
             clap::SubCommand::with_name("enable-key")
                 .about("Sets the key state to enabled of a customer master key (CMK) to enabled.")
                 .arg_from_usage("--key-id=[KEYID] 'key-id to enable'")
@@ -73,6 +78,14 @@ fn main() {
                     kms_rs::schedule_key_deletion(key_id, 30 as i64);
                 println!("{}", resp.to_string())
             }
+        } else {
+            println!("You must provide the key-id arg!");
+        }
+    } else if let Some(matches) = matches.subcommand_matches("cancel-key-deletion") {
+        if matches.is_present("key-id") {
+            let key_id: String = matches.value_of("key-id").unwrap().to_string();
+            let resp: serde_json::value::Value = kms_rs::cancel_key_deletion(key_id);
+            println!("{}", resp.to_string());
         } else {
             println!("You must provide the key-id arg!");
         }

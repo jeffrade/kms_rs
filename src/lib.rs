@@ -5,9 +5,9 @@ extern crate rusoto_core;
 
 use rusoto_core::Region;
 use rusoto_kms::{
-    CreateKeyRequest, DescribeKeyRequest, DisableKeyRequest, EnableKeyRequest, KeyListEntry,
-    KeyMetadata, Kms, KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
-    ScheduleKeyDeletionResponse,
+    CancelKeyDeletionRequest, CancelKeyDeletionResponse, CreateKeyRequest, DescribeKeyRequest,
+    DisableKeyRequest, EnableKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
+    ListKeysRequest, ScheduleKeyDeletionRequest, ScheduleKeyDeletionResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -59,6 +59,12 @@ pub fn schedule_key_deletion(key_id: String, pending_window_in_days: i64) -> Val
             key_id,
             pending_window_in_days,
         ))
+}
+
+pub fn cancel_key_deletion(key_id: String) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(cancel_key_deletion_and_parse(get_client(), key_id))
 }
 
 pub fn disable_key(key_id: &str) -> Option<Value> {
@@ -117,7 +123,7 @@ async fn schedule_key_deletion_and_parse(
     pending_window_in_days: i64,
 ) -> Value {
     let request = ScheduleKeyDeletionRequest {
-        key_id: key_id.to_string(),
+        key_id,
         pending_window_in_days: Some(pending_window_in_days),
     };
 
@@ -125,6 +131,17 @@ async fn schedule_key_deletion_and_parse(
 
     match result {
         Ok(response) => parse_schedule_deletion_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+async fn cancel_key_deletion_and_parse(client: KmsClient, key_id: String) -> Value {
+    let request = CancelKeyDeletionRequest { key_id };
+
+    let result = client.cancel_key_deletion(request).await;
+
+    match result {
+        Ok(response) => parse_cancel_deletion_response(response),
         Err(value) => json!(value.to_string()),
     }
 }
@@ -182,6 +199,12 @@ fn parse_schedule_deletion_response(
     json!({
         "KeyId": schedule_key_deletion_response.key_id.unwrap_or_default(),
         "DeletionDate": schedule_key_deletion_response.deletion_date.unwrap_or_default(),
+    })
+}
+
+fn parse_cancel_deletion_response(response: CancelKeyDeletionResponse) -> Value {
+    json!({
+        "KeyId": response.key_id.unwrap_or_default(),
     })
 }
 
