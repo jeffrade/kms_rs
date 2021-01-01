@@ -8,7 +8,7 @@ use rusoto_kms::{
     CancelKeyDeletionRequest, CancelKeyDeletionResponse, CreateKeyRequest, DescribeKeyRequest,
     DisableKeyRequest, EnableKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
     ListKeysRequest, ScheduleKeyDeletionRequest, ScheduleKeyDeletionResponse,
-};
+}; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::value::Value;
