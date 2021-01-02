@@ -87,7 +87,7 @@ pub fn enable_key(key_id: &str) -> Option<Value> {
 }
 
 /// Generates a unique symmetric data key for client-side encryption. This operation returns a plaintext copy of the data key and a copy that is encrypted under a customer master key (CMK) that you specify.
-pub fn generate_data_key(key_id: &str, key_spec: &str, bytes: i64) -> Value {
+pub fn generate_data_key(key_id: &str, key_spec: Option<String>, bytes: Option<i64>) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(generate_data_key_and_parse(
@@ -99,7 +99,7 @@ pub fn generate_data_key(key_id: &str, key_spec: &str, bytes: i64) -> Value {
 }
 
 /// Generates a unique symmetric data key. This operation returns a data key that is encrypted under a customer master key (CMK) that you specify.
-pub fn generate_data_key_without_plaintext(key_id: &str, key_spec: &str, bytes: i64) -> Value {
+pub fn generate_data_key_without_plaintext(key_id: &str, key_spec: Option<String>, bytes: Option<i64>) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(generate_data_key_without_plaintext_and_parse(
@@ -204,15 +204,15 @@ async fn disable_key_and_respond(client: KmsClient, key_id: &str) -> Option<Valu
 async fn generate_data_key_and_parse(
     client: KmsClient,
     key_id: &str,
-    key_spec: &str,
-    bytes: i64,
+    key_spec: Option<String>,
+    bytes: Option<i64>,
 ) -> Value {
     let request = GenerateDataKeyRequest {
         encryption_context: None,
         grant_tokens: None,
         key_id: key_id.to_string(),
-        key_spec: Some(key_spec.to_string()),
-        number_of_bytes: Some(bytes),
+        key_spec,
+        number_of_bytes: bytes,
     };
 
     let result = client.generate_data_key(request).await;
@@ -226,15 +226,15 @@ async fn generate_data_key_and_parse(
 async fn generate_data_key_without_plaintext_and_parse(
     client: KmsClient,
     key_id: &str,
-    key_spec: &str,
-    bytes: i64,
+    key_spec: Option<String>,
+    bytes: Option<i64>,
 ) -> Value {
     let request = GenerateDataKeyWithoutPlaintextRequest {
         encryption_context: None,
         grant_tokens: None,
         key_id: key_id.to_string(),
-        key_spec: Some(key_spec.to_string()),
-        number_of_bytes: Some(bytes),
+        key_spec,
+        number_of_bytes: bytes,
     };
 
     let result = client.generate_data_key_without_plaintext(request).await;
