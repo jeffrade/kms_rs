@@ -58,11 +58,14 @@ fn main() {
         println!("{}", keys.to_string());
     } else if let Some(matches) = matches.subcommand_matches("generate-data-key") {
         let key_id: &str = matches.value_of("key-id").unwrap();
-        let resp: serde_json::value::Value = kms_rs::generate_data_key(key_id, Some("AES_128".to_string()), None);
+        let resp: serde_json::value::Value =
+            kms_rs::generate_data_key(key_id, Some("AES_128".to_string()), None);
         println!("{}", resp.to_string());
-    } else if let Some(matches) = matches.subcommand_matches("generate-data-key-without-plaintext") {
+    } else if let Some(matches) = matches.subcommand_matches("generate-data-key-without-plaintext")
+    {
         let key_id: &str = matches.value_of("key-id").unwrap();
-        let resp: serde_json::value::Value = kms_rs::generate_data_key_without_plaintext(key_id, None, Some(196 as i64));
+        let resp: serde_json::value::Value =
+            kms_rs::generate_data_key_without_plaintext(key_id, None, Some(196 as i64));
         println!("{}", resp.to_string());
     } else if let Some(matches) = matches.subcommand_matches("describe-key") {
         if matches.is_present("key-id") {
