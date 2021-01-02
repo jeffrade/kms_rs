@@ -11,6 +11,8 @@ keywords = ["aws", "kms", "keys"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+base64 = "0.13"
+bytes = "0.5"
 futures = "0.3.8"
 rusoto_core = "0.45.0"
 rusoto_kms = "0.45.0"

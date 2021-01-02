@@ -1,13 +1,13 @@
 //! A crate (still under construction) for interacting with AWS KMS. Uses [rusoto](https://github.com/rusoto/rusoto) and [tokio](https://github.com/tokio-rs/tokio).
 #![allow(non_snake_case)]
 
-extern crate rusoto_core;
-
+use bytes::Bytes;
 use rusoto_core::Region;
 use rusoto_kms::{
     CancelKeyDeletionRequest, CancelKeyDeletionResponse, CreateKeyRequest, DescribeKeyRequest,
-    DisableKeyRequest, EnableKeyRequest, KeyListEntry, KeyMetadata, Kms, KmsClient,
-    ListKeysRequest, ScheduleKeyDeletionRequest, ScheduleKeyDeletionResponse,
+    DisableKeyRequest, EnableKeyRequest, GenerateDataKeyRequest, GenerateDataKeyResponse,
+    KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
+    ScheduleKeyDeletionResponse,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -83,6 +83,17 @@ pub fn enable_key(key_id: &str) -> Option<Value> {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(enable_key_and_respond(get_client(), key_id))
+}
+
+pub fn generate_data_key(key_id: &str, key_spec: &str, bytes: i64) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(generate_data_key_and_parse(
+            get_client(),
+            key_id,
+            key_spec,
+            bytes,
+        ))
 }
 
 async fn get_key(client: KmsClient, key_id: &str) -> Value {
@@ -176,6 +187,28 @@ async fn disable_key_and_respond(client: KmsClient, key_id: &str) -> Option<Valu
     }
 }
 
+async fn generate_data_key_and_parse(
+    client: KmsClient,
+    key_id: &str,
+    key_spec: &str,
+    bytes: i64,
+) -> Value {
+    let request = GenerateDataKeyRequest {
+        encryption_context: None,
+        grant_tokens: None,
+        key_id: key_id.to_string(),
+        key_spec: Some(key_spec.to_string()),
+        number_of_bytes: Some(bytes),
+    };
+
+    let result = client.generate_data_key(request).await;
+
+    match result {
+        Ok(response) => parse_data_key_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
 fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Value {
     let mut keys_json: Vec<KmsRsKey> = Vec::new();
 
@@ -212,6 +245,33 @@ fn parse_cancel_deletion_response(response: CancelKeyDeletionResponse) -> Value 
     json!({
         "KeyId": response.key_id.unwrap_or_default(),
     })
+}
+
+fn parse_data_key_response(response: GenerateDataKeyResponse) -> Value {
+    let key_id: Option<String> = response.key_id;
+    let ciphertext_blob: Option<String> = bytes_to_base64(response.ciphertext_blob);
+    let plaintext: Option<String> = bytes_to_base64(response.plaintext);
+
+    if plaintext.is_some() {
+        json!({
+            "CiphertextBlob": ciphertext_blob,
+            "Plaintext": plaintext,
+            "KeyId": key_id,
+        })
+    } else {
+        json!({
+            "CiphertextBlob": ciphertext_blob,
+            "KeyId": key_id,
+        })
+    }
+}
+
+fn bytes_to_base64(bytes: Option<Bytes>) -> Option<String> {
+    if bytes.is_none() {
+        None
+    } else {
+        Some(base64::encode(bytes.unwrap_or_default()))
+    }
 }
 
 #[cfg(test)]
@@ -299,5 +359,19 @@ mod tests {
             "DeletionDate": 12345678.90
         });
         assert_eq!(actual_output, expected_output);
+    }
+
+    #[test]
+    fn test_bytes_to_base64() {
+        let bytes: Bytes = Bytes::from("abc-1234567890-$()*-_=+");
+        let actual: String = bytes_to_base64(Some(bytes)).unwrap();
+        let expected: String = "YWJjLTEyMzQ1Njc4OTAtJCgpKi1fPSs=".to_string();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_bytes_to_base64_with_none() {
+        let actual: Option<String> = bytes_to_base64(None);
+        assert_eq!(None, actual);
     }
 }

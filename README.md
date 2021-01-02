@@ -23,6 +23,7 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Cancel key deletion](https://docs.aws.amazon.com/cli/latest/reference/kms/cancel-key-deletion.html)
  - [Enable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/enable-key.html) given a key-id
  - [Disable a key](https://docs.aws.amazon.com/cli/latest/reference/kms/disable-key.html) given a key-id
+ - [Generate a data key](https://docs.aws.amazon.com/cli/latest/reference/kms/generate-data-key.html)
 
 A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). Feel free to open an issue to request a command(s) or PR to add them.
 
