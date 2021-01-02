@@ -41,11 +41,29 @@ fn main() {
                 .about("Sets the key state to disabled of a customer master key (CMK) to enabled.")
                 .arg_from_usage("--key-id=[KEYID] 'key-id to disable'")
         )
+        .subcommand(
+            clap::SubCommand::with_name("generate-data-key")
+                .about("foobar")
+                .arg_from_usage("--key-id=[KEYID] 'key-id to encrypt with'")
+        )
+        .subcommand(
+            clap::SubCommand::with_name("generate-data-key-without-plaintext")
+                .about("barfoo")
+                .arg_from_usage("--key-id=[KEYID] 'key-id to encrypt with'")
+        )
         .get_matches();
 
     if matches.subcommand_matches("list-keys").is_some() {
         let keys: serde_json::value::Value = kms_rs::list_keys();
         println!("{}", keys.to_string());
+    } else if let Some(matches) = matches.subcommand_matches("generate-data-key") {
+        let key_id: &str = matches.value_of("key-id").unwrap();
+        let resp: serde_json::value::Value = kms_rs::generate_data_key(key_id, Some("AES_128".to_string()), None);
+        println!("{}", resp.to_string());
+    } else if let Some(matches) = matches.subcommand_matches("generate-data-key-without-plaintext") {
+        let key_id: &str = matches.value_of("key-id").unwrap();
+        let resp: serde_json::value::Value = kms_rs::generate_data_key_without_plaintext(key_id, None, Some(196 as i64));
+        println!("{}", resp.to_string());
     } else if let Some(matches) = matches.subcommand_matches("describe-key") {
         if matches.is_present("key-id") {
             let key_id: &str = matches.value_of("key-id").unwrap();
