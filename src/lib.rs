@@ -6,7 +6,8 @@ use rusoto_core::Region;
 use rusoto_kms::{
     CancelKeyDeletionRequest, CancelKeyDeletionResponse, CreateKeyRequest, DescribeKeyRequest,
     DisableKeyRequest, EnableKeyRequest, GenerateDataKeyRequest, GenerateDataKeyResponse,
-    KeyListEntry, KeyMetadata, Kms, KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
+    GenerateDataKeyWithoutPlaintextRequest, GenerateDataKeyWithoutPlaintextResponse, KeyListEntry,
+    KeyMetadata, Kms, KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
     ScheduleKeyDeletionResponse,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde::{Deserialize, Serialize};
@@ -85,10 +86,23 @@ pub fn enable_key(key_id: &str) -> Option<Value> {
         .block_on(enable_key_and_respond(get_client(), key_id))
 }
 
+/// Generates a unique symmetric data key for client-side encryption. This operation returns a plaintext copy of the data key and a copy that is encrypted under a customer master key (CMK) that you specify.
 pub fn generate_data_key(key_id: &str, key_spec: &str, bytes: i64) -> Value {
     Runtime::new()
         .expect("Failed to create Tokio runtime")
         .block_on(generate_data_key_and_parse(
+            get_client(),
+            key_id,
+            key_spec,
+            bytes,
+        ))
+}
+
+/// Generates a unique symmetric data key. This operation returns a data key that is encrypted under a customer master key (CMK) that you specify.
+pub fn generate_data_key_without_plaintext(key_id: &str, key_spec: &str, bytes: i64) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(generate_data_key_without_plaintext_and_parse(
             get_client(),
             key_id,
             key_spec,
@@ -209,6 +223,28 @@ async fn generate_data_key_and_parse(
     }
 }
 
+async fn generate_data_key_without_plaintext_and_parse(
+    client: KmsClient,
+    key_id: &str,
+    key_spec: &str,
+    bytes: i64,
+) -> Value {
+    let request = GenerateDataKeyWithoutPlaintextRequest {
+        encryption_context: None,
+        grant_tokens: None,
+        key_id: key_id.to_string(),
+        key_spec: Some(key_spec.to_string()),
+        number_of_bytes: Some(bytes),
+    };
+
+    let result = client.generate_data_key_without_plaintext(request).await;
+
+    match result {
+        Ok(response) => parse_data_key_without_plaintext_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
 fn parse_key_list_entries(key_list: Vec<KeyListEntry>) -> Value {
     let mut keys_json: Vec<KmsRsKey> = Vec::new();
 
@@ -251,7 +287,22 @@ fn parse_data_key_response(response: GenerateDataKeyResponse) -> Value {
     let key_id: Option<String> = response.key_id;
     let ciphertext_blob: Option<String> = bytes_to_base64(response.ciphertext_blob);
     let plaintext: Option<String> = bytes_to_base64(response.plaintext);
+    parse_data_key_fields(key_id, ciphertext_blob, plaintext)
+}
 
+fn parse_data_key_without_plaintext_response(
+    response: GenerateDataKeyWithoutPlaintextResponse,
+) -> Value {
+    let key_id: Option<String> = response.key_id;
+    let ciphertext_blob: Option<String> = bytes_to_base64(response.ciphertext_blob);
+    parse_data_key_fields(key_id, ciphertext_blob, None)
+}
+
+fn parse_data_key_fields(
+    key_id: Option<String>,
+    ciphertext_blob: Option<String>,
+    plaintext: Option<String>,
+) -> Value {
     if plaintext.is_some() {
         json!({
             "CiphertextBlob": ciphertext_blob,
