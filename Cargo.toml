@@ -1,6 +1,7 @@
 [package]
 name = "kms_rs"
 description = "A crate for interacting with AWS KMS."
+readme = "README.md"
 version = "0.1.0"
 authors = ["Jeff Rade <jeffrade@gmail.com>"]
 repository = "https://github.com/jeffrade/kms_rs"
