@@ -1,6 +1,7 @@
 //! A crate (still under construction) for interacting with AWS KMS. Uses [rusoto](https://github.com/rusoto/rusoto) and [tokio](https://github.com/tokio-rs/tokio).
 
 use serde_json::value::Value;
+use std::collections::HashMap;
 use tokio::runtime::Runtime;
 
 mod client;
@@ -75,5 +76,39 @@ pub fn generate_data_key_without_plaintext(
         .expect("Failed to create Tokio runtime")
         .block_on(client::generate_data_key_without_plaintext_and_parse(
             key_id, key_spec, bytes,
+        ))
+}
+
+/// Generates a unique asymmetric data key pair. The GenerateDataKeyPair operation returns a plaintext public key, a plaintext private key, and a copy of the private key that is encrypted under the symmetric CMK you specify.
+pub fn generate_data_key_pair(
+    key_id: &str,
+    key_pair_spec: String,
+    encryption_context: Option<HashMap<String, String>>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::generate_data_key_pair_and_parse(
+            key_id,
+            key_pair_spec,
+            encryption_context,
+            grant_tokens,
+        ))
+}
+
+/// Generates a unique asymmetric data key pair. The GenerateDataKeyPair-WithoutPlaintext operation returns a plaintext public key and a copy of the private key that is encrypted under the symmetric CMK you specify.
+pub fn generate_data_key_pair_without_plaintext(
+    key_id: &str,
+    key_pair_spec: String,
+    encryption_context: Option<HashMap<String, String>>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::generate_data_key_pair_without_plaintext_and_parse(
+            key_id,
+            key_pair_spec,
+            encryption_context,
+            grant_tokens,
         ))
 }

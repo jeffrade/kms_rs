@@ -3,8 +3,10 @@
 
 use bytes::Bytes;
 use rusoto_kms::{
-    CancelKeyDeletionResponse, GenerateDataKeyResponse, GenerateDataKeyWithoutPlaintextResponse,
-    KeyListEntry, KeyMetadata, ScheduleKeyDeletionResponse,
+    CancelKeyDeletionResponse, GenerateDataKeyPairResponse,
+    GenerateDataKeyPairWithoutPlaintextResponse, GenerateDataKeyResponse,
+    GenerateDataKeyWithoutPlaintextResponse, KeyListEntry, KeyMetadata,
+    ScheduleKeyDeletionResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -77,6 +79,39 @@ pub fn data_key_without_plaintext_response(
     parse_data_key_fields(key_id, ciphertext_blob, None)
 }
 
+pub fn data_key_pair_response(response: GenerateDataKeyPairResponse) -> Value {
+    let key_id: Option<String> = response.key_id;
+    let key_pair_spec: Option<String> = response.key_pair_spec;
+    let private_key_ciphertext_blob: Option<String> =
+        bytes_to_base64(response.private_key_ciphertext_blob);
+    let private_key_plaintext: Option<String> = bytes_to_base64(response.private_key_plaintext);
+    let public_key: Option<String> = bytes_to_base64(response.public_key);
+    parse_data_key_pair_fields(
+        key_id,
+        key_pair_spec,
+        private_key_ciphertext_blob,
+        private_key_plaintext,
+        public_key,
+    )
+}
+
+pub fn data_key_pair_without_plaintext_response(
+    response: GenerateDataKeyPairWithoutPlaintextResponse,
+) -> Value {
+    let key_id: Option<String> = response.key_id;
+    let key_pair_spec: Option<String> = response.key_pair_spec;
+    let private_key_ciphertext_blob: Option<String> =
+        bytes_to_base64(response.private_key_ciphertext_blob);
+    let public_key: Option<String> = bytes_to_base64(response.public_key);
+    parse_data_key_pair_fields(
+        key_id,
+        key_pair_spec,
+        private_key_ciphertext_blob,
+        public_key,
+        None,
+    )
+}
+
 fn parse_data_key_fields(
     key_id: Option<String>,
     ciphertext_blob: Option<String>,
@@ -92,6 +127,31 @@ fn parse_data_key_fields(
         json!({
             "CiphertextBlob": ciphertext_blob,
             "KeyId": key_id,
+        })
+    }
+}
+
+fn parse_data_key_pair_fields(
+    key_id: Option<String>,
+    key_pair_spec: Option<String>,
+    private_key_ciphertext_blob: Option<String>,
+    private_key_plaintext: Option<String>,
+    public_key: Option<String>,
+) -> Value {
+    if private_key_plaintext.is_some() {
+        json!({
+            "KeyId": key_id,
+            "KeyPairSpec": key_pair_spec,
+            "PrivateKeyCiphertextBlob": private_key_ciphertext_blob,
+            "PrivateKeyPlaintext": private_key_plaintext,
+            "PublicKey": public_key,
+        })
+    } else {
+        json!({
+            "KeyId": key_id,
+            "KeyPairSpec": key_pair_spec,
+            "PrivateKeyCiphertextBlob": private_key_ciphertext_blob,
+            "PublicKey": public_key,
         })
     }
 }

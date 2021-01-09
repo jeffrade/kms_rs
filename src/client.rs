@@ -3,11 +3,14 @@
 use rusoto_core::Region;
 use rusoto_kms::{
     CancelKeyDeletionRequest, CreateKeyRequest, DescribeKeyRequest, DisableKeyRequest,
-    EnableKeyRequest, GenerateDataKeyRequest, GenerateDataKeyWithoutPlaintextRequest, Kms,
-    KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest,
+    EnableKeyRequest, GenerateDataKeyPairRequest, GenerateDataKeyPairWithoutPlaintextRequest,
+    GenerateDataKeyRequest, GenerateDataKeyWithoutPlaintextRequest, Kms, KmsClient,
+    ListKeysRequest, ScheduleKeyDeletionRequest,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde_json::json;
 use serde_json::value::Value;
+use std::collections::HashMap;
+use std::vec::Vec;
 
 use crate::parse;
 
@@ -142,6 +145,50 @@ pub async fn generate_data_key_without_plaintext_and_parse(
 
     match result {
         Ok(response) => parse::data_key_without_plaintext_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn generate_data_key_pair_and_parse(
+    key_id: &str,
+    key_pair_spec: String,
+    encryption_context: Option<HashMap<String, String>>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    let request = GenerateDataKeyPairRequest {
+        encryption_context,
+        grant_tokens,
+        key_id: key_id.to_string(),
+        key_pair_spec,
+    };
+
+    let result = get_client().generate_data_key_pair(request).await;
+
+    match result {
+        Ok(response) => parse::data_key_pair_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn generate_data_key_pair_without_plaintext_and_parse(
+    key_id: &str,
+    key_pair_spec: String,
+    encryption_context: Option<HashMap<String, String>>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    let request = GenerateDataKeyPairWithoutPlaintextRequest {
+        encryption_context,
+        grant_tokens,
+        key_id: key_id.to_string(),
+        key_pair_spec,
+    };
+
+    let result = get_client()
+        .generate_data_key_pair_without_plaintext(request)
+        .await;
+
+    match result {
+        Ok(response) => parse::data_key_pair_without_plaintext_response(response),
         Err(value) => json!(value.to_string()),
     }
 }
