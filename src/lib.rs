@@ -1,5 +1,6 @@
 //! A crate (still under construction) for interacting with AWS KMS. Uses [rusoto](https://github.com/rusoto/rusoto) and [tokio](https://github.com/tokio-rs/tokio).
 
+use bytes::Bytes;
 use serde_json::value::Value;
 use std::collections::HashMap;
 use tokio::runtime::Runtime;
@@ -109,6 +110,25 @@ pub fn generate_data_key_pair_without_plaintext(
             key_id,
             key_pair_spec,
             encryption_context,
+            grant_tokens,
+        ))
+}
+
+/// Encrypts  plaintext  into  ciphertext  by  using  a customer master key (CMK).
+pub fn encrypt(
+    key_id: String,
+    plaintext: Bytes,
+    encryption_context: Option<HashMap<String, String>>,
+    encryption_algorithm: Option<String>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::encrypt(
+            key_id,
+            plaintext,
+            encryption_context,
+            encryption_algorithm,
             grant_tokens,
         ))
 }

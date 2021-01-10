@@ -1,11 +1,13 @@
 //! Module responsible for handling the requests and responses.
 
+use bytes::Bytes;
 use rusoto_core::Region;
 use rusoto_kms::{
     CancelKeyDeletionRequest, CreateKeyRequest, DescribeKeyRequest, DisableKeyRequest,
-    EnableKeyRequest, GenerateDataKeyPairRequest, GenerateDataKeyPairWithoutPlaintextRequest,
-    GenerateDataKeyRequest, GenerateDataKeyWithoutPlaintextRequest, Kms, KmsClient,
-    ListKeysRequest, ScheduleKeyDeletionRequest,
+    EnableKeyRequest, EncryptRequest, GenerateDataKeyPairRequest,
+    GenerateDataKeyPairWithoutPlaintextRequest, GenerateDataKeyRequest,
+    GenerateDataKeyWithoutPlaintextRequest, Kms, KmsClient, ListKeysRequest,
+    ScheduleKeyDeletionRequest,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde_json::json;
 use serde_json::value::Value;
@@ -189,6 +191,29 @@ pub async fn generate_data_key_pair_without_plaintext_and_parse(
 
     match result {
         Ok(response) => parse::data_key_pair_without_plaintext_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn encrypt(
+    key_id: String,
+    plaintext: Bytes,
+    encryption_context: Option<HashMap<String, String>>,
+    encryption_algorithm: Option<String>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    let request = EncryptRequest {
+        key_id,
+        plaintext,
+        encryption_context,
+        encryption_algorithm,
+        grant_tokens,
+    };
+
+    let result = get_client().encrypt(request).await;
+
+    match result {
+        Ok(response) => parse::encrypt_response(response),
         Err(value) => json!(value.to_string()),
     }
 }

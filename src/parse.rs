@@ -3,7 +3,7 @@
 
 use bytes::Bytes;
 use rusoto_kms::{
-    CancelKeyDeletionResponse, GenerateDataKeyPairResponse,
+    CancelKeyDeletionResponse, EncryptResponse, GenerateDataKeyPairResponse,
     GenerateDataKeyPairWithoutPlaintextResponse, GenerateDataKeyResponse,
     GenerateDataKeyWithoutPlaintextResponse, KeyListEntry, KeyMetadata,
     ScheduleKeyDeletionResponse,
@@ -110,6 +110,14 @@ pub fn data_key_pair_without_plaintext_response(
         public_key,
         None,
     )
+}
+
+pub fn encrypt_response(response: EncryptResponse) -> Value {
+    json!({
+        "KeyId": response.key_id,
+        "CiphertextBlob": bytes_to_base64(response.ciphertext_blob),
+        "EncryptionAlgorithm": response.encryption_algorithm
+    })
 }
 
 fn parse_data_key_fields(
