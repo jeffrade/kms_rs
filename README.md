@@ -28,6 +28,7 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Generate a data key pair](https://docs.aws.amazon.com/cli/latest/reference/kms/generate-data-key-pair.html)
  - [Generate a data key pair without plaintext](https://docs.aws.amazon.com/cli/latest/reference/kms/generate-data-key-pair-without-plaintext.html)
  - [Encrypt plaintext](https://docs.aws.amazon.com/cli/latest/reference/kms/encrypt.html)
+ - [Decrypt ciphertext](https://docs.aws.amazon.com/cli/latest/reference/kms/decrypt.html)
 
 A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). Feel free to open an issue to request a command(s) or PR to add them.
 

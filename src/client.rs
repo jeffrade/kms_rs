@@ -3,8 +3,8 @@
 use bytes::Bytes;
 use rusoto_core::Region;
 use rusoto_kms::{
-    CancelKeyDeletionRequest, CreateKeyRequest, DescribeKeyRequest, DisableKeyRequest,
-    EnableKeyRequest, EncryptRequest, GenerateDataKeyPairRequest,
+    CancelKeyDeletionRequest, CreateKeyRequest, DecryptRequest, DescribeKeyRequest,
+    DisableKeyRequest, EnableKeyRequest, EncryptRequest, GenerateDataKeyPairRequest,
     GenerateDataKeyPairWithoutPlaintextRequest, GenerateDataKeyRequest,
     GenerateDataKeyWithoutPlaintextRequest, Kms, KmsClient, ListKeysRequest,
     ScheduleKeyDeletionRequest,
@@ -214,6 +214,29 @@ pub async fn encrypt(
 
     match result {
         Ok(response) => parse::encrypt_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn decrypt(
+    key_id: Option<String>,
+    ciphertext_blob: Bytes,
+    encryption_context: Option<HashMap<String, String>>,
+    encryption_algorithm: Option<String>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    let request = DecryptRequest {
+        key_id,
+        ciphertext_blob,
+        encryption_context,
+        encryption_algorithm,
+        grant_tokens,
+    };
+
+    let result = get_client().decrypt(request).await;
+
+    match result {
+        Ok(response) => parse::decrypt_response(response),
         Err(value) => json!(value.to_string()),
     }
 }

@@ -132,3 +132,22 @@ pub fn encrypt(
             grant_tokens,
         ))
 }
+
+/// Decrypts ciphertext that was encrypted by a AWS KMS customer master key (CMK) using any of the following operations: Encrypt, GenerateDataKey, GenerateDataKeyPair, GenerateDataKeyWithoutPlaintext, GenerateDataKeyPairWithoutPlaintext
+pub fn decrypt(
+    key_id: Option<String>,
+    ciphertext_blob: Bytes,
+    encryption_context: Option<HashMap<String, String>>,
+    encryption_algorithm: Option<String>,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::decrypt(
+            key_id,
+            ciphertext_blob,
+            encryption_context,
+            encryption_algorithm,
+            grant_tokens,
+        ))
+}
