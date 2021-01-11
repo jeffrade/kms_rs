@@ -114,17 +114,17 @@ pub fn data_key_pair_without_plaintext_response(
 
 pub fn encrypt_response(response: EncryptResponse) -> Value {
     json!({
-        "KeyId": response.key_id,
-        "CiphertextBlob": bytes_to_base64(response.ciphertext_blob),
-        "EncryptionAlgorithm": response.encryption_algorithm
+        "KeyId": response.key_id.unwrap_or_default(),
+        "CiphertextBlob": bytes_to_base64(response.ciphertext_blob).unwrap_or_default(),
+        "EncryptionAlgorithm": response.encryption_algorithm.unwrap_or_default()
     })
 }
 
 pub fn decrypt_response(response: DecryptResponse) -> Value {
     json!({
-        "KeyId": response.key_id,
-        "Plaintext": bytes_to_base64(response.plaintext),
-        "EncryptionAlgorithm": response.encryption_algorithm
+        "KeyId": response.key_id.unwrap_or_default(),
+        "Plaintext": bytes_to_base64(response.plaintext).unwrap_or_default(),
+        "EncryptionAlgorithm": response.encryption_algorithm.unwrap_or_default()
     })
 }
 
