@@ -30,6 +30,7 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Encrypt plaintext](https://docs.aws.amazon.com/cli/latest/reference/kms/encrypt.html)
  - [Decrypt ciphertext](https://docs.aws.amazon.com/cli/latest/reference/kms/decrypt.html)
  - [Sign a message](https://docs.aws.amazon.com/cli/latest/reference/kms/sign.html)
+ - [Verify a signature](https://docs.aws.amazon.com/cli/latest/reference/kms/verify.html)
 
 A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). Feel free to open an issue to request a command(s) or PR to add them.
 
