@@ -7,7 +7,7 @@ use rusoto_kms::{
     DisableKeyRequest, EnableKeyRequest, EncryptRequest, GenerateDataKeyPairRequest,
     GenerateDataKeyPairWithoutPlaintextRequest, GenerateDataKeyRequest,
     GenerateDataKeyWithoutPlaintextRequest, Kms, KmsClient, ListKeysRequest,
-    ScheduleKeyDeletionRequest,
+    ScheduleKeyDeletionRequest, SignRequest,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde_json::json;
 use serde_json::value::Value;
@@ -237,6 +237,29 @@ pub async fn decrypt(
 
     match result {
         Ok(response) => parse::decrypt_response(response),
+        Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn sign(
+    key_id: String,
+    message: Bytes,
+    message_type: Option<String>,
+    signing_algorithm: String,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    let request = SignRequest {
+        key_id,
+        message,
+        message_type,
+        signing_algorithm,
+        grant_tokens,
+    };
+
+    let result = get_client().sign(request).await;
+
+    match result {
+        Ok(response) => parse::sign_response(response),
         Err(value) => json!(value.to_string()),
     }
 }

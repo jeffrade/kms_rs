@@ -6,7 +6,7 @@ use rusoto_kms::{
     CancelKeyDeletionResponse, DecryptResponse, EncryptResponse, GenerateDataKeyPairResponse,
     GenerateDataKeyPairWithoutPlaintextResponse, GenerateDataKeyResponse,
     GenerateDataKeyWithoutPlaintextResponse, KeyListEntry, KeyMetadata,
-    ScheduleKeyDeletionResponse,
+    ScheduleKeyDeletionResponse, SignResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -125,6 +125,14 @@ pub fn decrypt_response(response: DecryptResponse) -> Value {
         "KeyId": response.key_id,
         "Plaintext": bytes_to_base64(response.plaintext),
         "EncryptionAlgorithm": response.encryption_algorithm
+    })
+}
+
+pub fn sign_response(response: SignResponse) -> Value {
+    json!({
+        "KeyId": response.key_id.unwrap_or_default(),
+        "Signature": bytes_to_base64(response.signature).unwrap_or_default(),
+        "SigningAlgorithm": response.signing_algorithm.unwrap_or_default(),
     })
 }
 

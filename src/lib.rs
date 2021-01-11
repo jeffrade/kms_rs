@@ -151,3 +151,22 @@ pub fn decrypt(
             grant_tokens,
         ))
 }
+
+/// Creates a digital signature for a message or message digest by using the private key in an asymmetric CMK. To verify the signature, use the Verify operation, or use the public key in the same asymmetric CMK outside of AWS KMS.
+pub fn sign(
+    key_id: String,
+    message: Bytes,
+    message_type: Option<String>,
+    signing_algorithm: String,
+    grant_tokens: Option<Vec<String>>,
+) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::sign(
+            key_id,
+            message,
+            message_type,
+            signing_algorithm,
+            grant_tokens,
+        ))
+}
