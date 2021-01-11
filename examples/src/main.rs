@@ -43,12 +43,12 @@ fn main() {
         )
         .subcommand(
             clap::SubCommand::with_name("generate-data-key")
-                .about("foobar")
+                .about("Generates a unique symmetric data key for client-side encryption.")
                 .arg_from_usage("--key-id=[KEYID] 'key-id to encrypt with'")
         )
         .subcommand(
             clap::SubCommand::with_name("generate-data-key-without-plaintext")
-                .about("barfoo")
+                .about("Generates a unique symmetric data key.")
                 .arg_from_usage("--key-id=[KEYID] 'key-id to encrypt with'")
         )
         .get_matches();
