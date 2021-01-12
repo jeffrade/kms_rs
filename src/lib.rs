@@ -191,3 +191,10 @@ pub fn verify(
             grant_tokens,
         ))
 }
+
+/// Returns the public key of an asymmetric CMK. To quickly create a key to test with outside of this lib, run: `aws kms create-key --key-usage ENCRYPT_DECRYPT --customer-master-key-spec RSA_2048`
+pub fn get_public_key(key_id: String, grant_tokens: Option<Vec<String>>) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::get_public_key(key_id, grant_tokens))
+}

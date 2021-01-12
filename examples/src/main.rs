@@ -51,6 +51,11 @@ fn main() {
                 .about("Generates a unique symmetric data key.")
                 .arg_from_usage("--key-id=[KEYID] 'key-id to encrypt with'")
         )
+        .subcommand(
+            clap::SubCommand::with_name("get-public-key")
+                .about("Returns  the public key of an asymmetric CMK.")
+                .arg_from_usage("--key-id=[KEYID] 'key-id to the asymmetric key'")
+        )
         .get_matches();
 
     if matches.subcommand_matches("list-keys").is_some() {
@@ -130,6 +135,10 @@ fn main() {
         } else {
             println!("You must provide the key-id arg!");
         }
+    } else if let Some(matches) = matches.subcommand_matches("get-public-key") {
+        let key_id: String = matches.value_of("key-id").unwrap().to_string();
+        let resp: serde_json::value::Value = kms_rs::get_public_key(key_id, None);
+        println!("{}", resp.to_string());
     } else {
         println!("You must pass a valid command!");
     }

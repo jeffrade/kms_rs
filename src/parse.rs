@@ -5,7 +5,7 @@ use bytes::Bytes;
 use rusoto_kms::{
     CancelKeyDeletionResponse, DecryptResponse, EncryptResponse, GenerateDataKeyPairResponse,
     GenerateDataKeyPairWithoutPlaintextResponse, GenerateDataKeyResponse,
-    GenerateDataKeyWithoutPlaintextResponse, KeyListEntry, KeyMetadata,
+    GenerateDataKeyWithoutPlaintextResponse, GetPublicKeyResponse, KeyListEntry, KeyMetadata,
     ScheduleKeyDeletionResponse, SignResponse, VerifyResponse,
 };
 use serde::{Deserialize, Serialize};
@@ -141,6 +141,17 @@ pub fn verify_response(response: VerifyResponse) -> Value {
         "KeyId": response.key_id.unwrap_or_default(),
         "SignatureValid": response.signature_valid.unwrap_or_default(),
         "SigningAlgorithm": response.signing_algorithm.unwrap_or_default(),
+    })
+}
+
+pub fn get_public_key_response(response: GetPublicKeyResponse) -> Value {
+    json!({
+        "KeyId": response.key_id.unwrap_or_default(),
+        "PublicKey": bytes_to_base64(response.public_key).unwrap_or_default(),
+        "CustomerMasterKeySpec": response.customer_master_key_spec.unwrap_or_default(),
+        "KeyUsage": response.key_usage.unwrap_or_default(),
+        "EncryptionAlgorithms": response.encryption_algorithms.unwrap_or_default(),
+        "SigningAlgorithms": response.signing_algorithms.unwrap_or_default(),
     })
 }
 
