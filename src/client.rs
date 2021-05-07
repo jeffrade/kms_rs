@@ -6,8 +6,8 @@ use rusoto_kms::{
     CancelKeyDeletionRequest, CreateKeyRequest, DecryptRequest, DescribeKeyRequest,
     DisableKeyRequest, EnableKeyRequest, EncryptRequest, GenerateDataKeyPairRequest,
     GenerateDataKeyPairWithoutPlaintextRequest, GenerateDataKeyRequest,
-    GenerateDataKeyWithoutPlaintextRequest, GetPublicKeyRequest, Kms, KmsClient, ListKeysRequest,
-    ScheduleKeyDeletionRequest, SignRequest, VerifyRequest,
+    GenerateDataKeyWithoutPlaintextRequest, GenerateRandomRequest, GetPublicKeyRequest, Kms,
+    KmsClient, ListKeysRequest, ScheduleKeyDeletionRequest, SignRequest, VerifyRequest,
 }; // https://docs.rs/rusoto_kms/0.45.0/rusoto_kms/#structs
 use serde_json::json;
 use serde_json::value::Value;
@@ -300,5 +300,17 @@ pub async fn get_public_key(key_id: String, grant_tokens: Option<Vec<String>>) -
     match result {
         Ok(response) => parse::get_public_key_response(response),
         Err(value) => json!(value.to_string()),
+    }
+}
+
+pub async fn generate_random(number_of_bytes: i64, custom_key_store_id: Option<String>) -> Value {
+    let request = GenerateRandomRequest {
+        number_of_bytes: Some(number_of_bytes),
+        custom_key_store_id,
+    };
+
+    match get_client().generate_random(request).await {
+        Ok(response) => parse::generate_random_response(response),
+        Err(err) => json!(err.to_string()),
     }
 }

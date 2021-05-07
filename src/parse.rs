@@ -5,8 +5,8 @@ use bytes::Bytes;
 use rusoto_kms::{
     CancelKeyDeletionResponse, DecryptResponse, EncryptResponse, GenerateDataKeyPairResponse,
     GenerateDataKeyPairWithoutPlaintextResponse, GenerateDataKeyResponse,
-    GenerateDataKeyWithoutPlaintextResponse, GetPublicKeyResponse, KeyListEntry, KeyMetadata,
-    ScheduleKeyDeletionResponse, SignResponse, VerifyResponse,
+    GenerateDataKeyWithoutPlaintextResponse, GenerateRandomResponse, GetPublicKeyResponse,
+    KeyListEntry, KeyMetadata, ScheduleKeyDeletionResponse, SignResponse, VerifyResponse,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -152,6 +152,12 @@ pub fn get_public_key_response(response: GetPublicKeyResponse) -> Value {
         "KeyUsage": response.key_usage.unwrap_or_default(),
         "EncryptionAlgorithms": response.encryption_algorithms.unwrap_or_default(),
         "SigningAlgorithms": response.signing_algorithms.unwrap_or_default(),
+    })
+}
+
+pub fn generate_random_response(response: GenerateRandomResponse) -> Value {
+    json!({
+        "Plaintext": bytes_to_base64(response.plaintext).unwrap_or_default(),
     })
 }
 

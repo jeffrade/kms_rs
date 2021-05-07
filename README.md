@@ -32,6 +32,7 @@ See [examples](https://github.com/jeffrade/kms_rs/blob/master/examples/src/main.
  - [Sign a message](https://docs.aws.amazon.com/cli/latest/reference/kms/sign.html)
  - [Verify a signature](https://docs.aws.amazon.com/cli/latest/reference/kms/verify.html)
  - [Get public key](https://docs.aws.amazon.com/cli/latest/reference/kms/get-public-key.html)
+ - [Generate random bytes](https://docs.aws.amazon.com/cli/latest/reference/kms/generate-random.html)
 
 A full list of commands can be found [here](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#available-commands). Feel free to open an issue to request a command(s) or PR to add them.
 

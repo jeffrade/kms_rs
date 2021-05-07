@@ -198,3 +198,13 @@ pub fn get_public_key(key_id: String, grant_tokens: Option<Vec<String>>) -> Valu
         .expect("Failed to create Tokio runtime")
         .block_on(client::get_public_key(key_id, grant_tokens))
 }
+
+/// Returns a random byte string that is cryptographically secure. By default, the random byte string is generated in AWS KMS. To generate the byte string in the AWS CloudHSM cluster that is associated with a custom key store , specify the custom key store ID.
+pub fn generate_random(number_of_bytes: i64, custom_key_store_id: Option<String>) -> Value {
+    Runtime::new()
+        .expect("Failed to create Tokio runtime")
+        .block_on(client::generate_random(
+            number_of_bytes,
+            custom_key_store_id,
+        ))
+}
